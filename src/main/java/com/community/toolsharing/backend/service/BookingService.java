@@ -14,6 +14,7 @@ import com.community.toolsharing.backend.util.CurrentUserUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.List;
 
 @Service
@@ -55,17 +56,34 @@ public class BookingService {
         }
 
         if (slot.getStatus() != SlotStatus.AVAILABLE) {
-            throw new BadRequestException("Slot is not available");
+            throw new BadRequestException("Only AVAILABLE slots can be requested");
         }
 
-        if (bookingRequestRepository.existsBySlotId(slot.getId())) {
-            throw new BadRequestException("Slot already has a booking request");
+        Instant requestedStartTime = request.getRequestedStartTime();
+        Instant requestedEndTime = request.getRequestedEndTime();
+        if (!requestedStartTime.isBefore(requestedEndTime)) {
+            throw new BadRequestException("requestedStartTime must be before requestedEndTime");
+        }
+        if (requestedStartTime.isBefore(slot.getStartTime()) || requestedEndTime.isAfter(slot.getEndTime())) {
+            throw new BadRequestException("Requested time must be inside the owner's availability slot");
+        }
+
+        boolean overlaps = bookingRequestRepository.existsBySlotIdAndStatusInAndRequestedStartTimeLessThanAndRequestedEndTimeGreaterThan(
+                slot.getId(),
+                List.of(BookingStatus.PENDING, BookingStatus.APPROVED, BookingStatus.RETURN_PENDING),
+                requestedEndTime,
+                requestedStartTime
+        );
+        if (overlaps) {
+            throw new BadRequestException("Requested time overlaps with an existing booking request");
         }
 
         BookingRequest booking = new BookingRequest();
         booking.setTool(tool);
         booking.setBorrower(borrower);
         booking.setSlot(slot);
+        booking.setRequestedStartTime(requestedStartTime);
+        booking.setRequestedEndTime(requestedEndTime);
         booking.setStatus(BookingStatus.PENDING);
 
         if (fraudDetectionService.isSuspicious(booking)) {
@@ -86,7 +104,6 @@ public class BookingService {
         }
 
         booking.setStatus(BookingStatus.APPROVED);
-        booking.getSlot().setStatus(SlotStatus.BOOKED);
 
         return toResponse(bookingRequestRepository.save(booking));
     }
@@ -102,7 +119,6 @@ public class BookingService {
         }
 
         booking.setStatus(BookingStatus.REJECTED);
-        booking.getSlot().setStatus(SlotStatus.AVAILABLE);
 
         return toResponse(bookingRequestRepository.save(booking));
     }
@@ -114,12 +130,39 @@ public class BookingService {
                 .orElseThrow(() -> new ResourceNotFoundException("Booking not found for borrower"));
 
         if (booking.getStatus() != BookingStatus.APPROVED) {
-            throw new BadRequestException("Only APPROVED bookings can be returned");
+            throw new BadRequestException("Only APPROVED bookings can request return");
+        }
+
+        booking.setStatus(BookingStatus.RETURN_PENDING);
+
+        return toResponse(bookingRequestRepository.save(booking));
+    }
+
+    @Transactional
+    public BookingResponse approveReturn(Long id) {
+        AppUser current = currentUserUtil.getCurrentUser();
+        BookingRequest booking = bookingRequestRepository.findByIdAndToolOwnerId(id, current.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Booking not found for owner"));
+
+        if (booking.getStatus() != BookingStatus.RETURN_PENDING) {
+            throw new BadRequestException("Only RETURN_PENDING bookings can be return-approved");
         }
 
         booking.setStatus(BookingStatus.RETURNED);
-        booking.getSlot().setStatus(SlotStatus.AVAILABLE);
+        return toResponse(bookingRequestRepository.save(booking));
+    }
 
+    @Transactional
+    public BookingResponse rejectReturn(Long id) {
+        AppUser current = currentUserUtil.getCurrentUser();
+        BookingRequest booking = bookingRequestRepository.findByIdAndToolOwnerId(id, current.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Booking not found for owner"));
+
+        if (booking.getStatus() != BookingStatus.RETURN_PENDING) {
+            throw new BadRequestException("Only RETURN_PENDING bookings can be return-rejected");
+        }
+
+        booking.setStatus(BookingStatus.APPROVED);
         return toResponse(bookingRequestRepository.save(booking));
     }
 
@@ -149,6 +192,8 @@ public class BookingService {
                 b.getSlot().getId(),
                 b.getSlot().getStartTime(),
                 b.getSlot().getEndTime(),
+                b.getRequestedStartTime(),
+                b.getRequestedEndTime(),
                 b.getStatus(),
                 b.getCreatedAt()
         );

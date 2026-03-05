@@ -9,8 +9,6 @@ import java.time.Instant;
         @Index(name = "idx_booking_borrower_id", columnList = "borrower_id"),
         @Index(name = "idx_booking_tool_id", columnList = "tool_id"),
         @Index(name = "idx_booking_slot_id", columnList = "slot_id")
-}, uniqueConstraints = {
-        @UniqueConstraint(name = "uk_booking_slot", columnNames = "slot_id")
 })
 public class BookingRequest {
     @Id
@@ -25,9 +23,15 @@ public class BookingRequest {
     @JoinColumn(name = "borrower_id", nullable = false)
     private AppUser borrower;
 
-    @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "slot_id", nullable = false, unique = true)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "slot_id", nullable = false)
     private AvailabilitySlot slot;
+
+    @Column(name = "requested_start_time", nullable = false)
+    private Instant requestedStartTime;
+
+    @Column(name = "requested_end_time", nullable = false)
+    private Instant requestedEndTime;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
@@ -49,6 +53,10 @@ public class BookingRequest {
     public void setBorrower(AppUser borrower) { this.borrower = borrower; }
     public AvailabilitySlot getSlot() { return slot; }
     public void setSlot(AvailabilitySlot slot) { this.slot = slot; }
+    public Instant getRequestedStartTime() { return requestedStartTime; }
+    public void setRequestedStartTime(Instant requestedStartTime) { this.requestedStartTime = requestedStartTime; }
+    public Instant getRequestedEndTime() { return requestedEndTime; }
+    public void setRequestedEndTime(Instant requestedEndTime) { this.requestedEndTime = requestedEndTime; }
     public BookingStatus getStatus() { return status; }
     public void setStatus(BookingStatus status) { this.status = status; }
     public Instant getCreatedAt() { return createdAt; }

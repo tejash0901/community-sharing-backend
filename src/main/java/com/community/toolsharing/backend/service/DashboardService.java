@@ -21,7 +21,7 @@ public class DashboardService {
         List<ToolResponse> myTools = toolService.getMyTools();
         List<BookingResponse> borrowed = bookingService.getMyBorrowedBookings();
         List<BookingResponse> ownerPending = bookingService.getOwnerBookings().stream()
-                .filter(b -> "PENDING".equals(b.status().name()))
+                .filter(b -> "PENDING".equals(b.status().name()) || "RETURN_PENDING".equals(b.status().name()))
                 .toList();
 
         return new DashboardResponse(myTools, borrowed, ownerPending);

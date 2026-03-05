@@ -38,6 +38,16 @@ public class BookingController {
         return ResponseEntity.ok(bookingService.returnTool(id));
     }
 
+    @PatchMapping("/{id}/return/approve")
+    public ResponseEntity<BookingResponse> approveReturn(@PathVariable Long id) {
+        return ResponseEntity.ok(bookingService.approveReturn(id));
+    }
+
+    @PatchMapping("/{id}/return/reject")
+    public ResponseEntity<BookingResponse> rejectReturn(@PathVariable Long id) {
+        return ResponseEntity.ok(bookingService.rejectReturn(id));
+    }
+
     @GetMapping("/mine")
     public ResponseEntity<List<BookingResponse>> mine() {
         return ResponseEntity.ok(bookingService.getMyBorrowedBookings());

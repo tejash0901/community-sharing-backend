@@ -15,6 +15,8 @@ public record BookingResponse(
         Long slotId,
         Instant slotStartTime,
         Instant slotEndTime,
+        Instant requestedStartTime,
+        Instant requestedEndTime,
         BookingStatus status,
         Instant createdAt
 ) {

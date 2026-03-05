@@ -53,13 +53,17 @@ CREATE TABLE IF NOT EXISTS booking_requests (
     id BIGSERIAL PRIMARY KEY,
     tool_id BIGINT NOT NULL,
     borrower_id BIGINT NOT NULL,
-    slot_id BIGINT NOT NULL UNIQUE,
+    slot_id BIGINT NOT NULL,
+    requested_start_time TIMESTAMP NOT NULL,
+    requested_end_time TIMESTAMP NOT NULL,
     status VARCHAR(20) NOT NULL,
     created_at TIMESTAMP NOT NULL,
     CONSTRAINT fk_booking_tool FOREIGN KEY (tool_id) REFERENCES tools (id),
     CONSTRAINT fk_booking_borrower FOREIGN KEY (borrower_id) REFERENCES users (id),
-    CONSTRAINT fk_booking_slot FOREIGN KEY (slot_id) REFERENCES availability_slots (id)
+    CONSTRAINT fk_booking_slot FOREIGN KEY (slot_id) REFERENCES availability_slots (id),
+    CONSTRAINT ck_booking_time_valid CHECK (requested_start_time < requested_end_time)
 );
 CREATE INDEX IF NOT EXISTS idx_booking_borrower_id ON booking_requests(borrower_id);
 CREATE INDEX IF NOT EXISTS idx_booking_tool_id ON booking_requests(tool_id);
 CREATE INDEX IF NOT EXISTS idx_booking_slot_id ON booking_requests(slot_id);
+CREATE INDEX IF NOT EXISTS idx_booking_requested_time ON booking_requests(requested_start_time, requested_end_time);
