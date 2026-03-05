@@ -70,7 +70,7 @@ public class BookingService {
 
         boolean overlaps = bookingRequestRepository.existsBySlotIdAndStatusInAndRequestedStartTimeLessThanAndRequestedEndTimeGreaterThan(
                 slot.getId(),
-                List.of(BookingStatus.PENDING, BookingStatus.APPROVED, BookingStatus.RETURN_PENDING),
+                List.of(BookingStatus.PENDING, BookingStatus.APPROVED, BookingStatus.RETURN_PENDING, BookingStatus.RETURN_REJECTED),
                 requestedEndTime,
                 requestedStartTime
         );
@@ -162,7 +162,7 @@ public class BookingService {
             throw new BadRequestException("Only RETURN_PENDING bookings can be return-rejected");
         }
 
-        booking.setStatus(BookingStatus.APPROVED);
+        booking.setStatus(BookingStatus.RETURN_REJECTED);
         return toResponse(bookingRequestRepository.save(booking));
     }
 
