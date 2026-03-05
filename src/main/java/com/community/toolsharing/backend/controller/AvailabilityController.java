@@ -28,6 +28,11 @@ public class AvailabilityController {
         return ResponseEntity.ok(availabilityService.getSlotsForTool(toolId));
     }
 
+    @GetMapping("/api/tools/{toolId}/availability/windows")
+    public ResponseEntity<List<AvailabilityResponse>> getAvailabilityWindows(@PathVariable Long toolId) {
+        return ResponseEntity.ok(availabilityService.getAvailableWindowsForTool(toolId));
+    }
+
     @DeleteMapping("/api/availability/{id}")
     public ResponseEntity<Void> deleteAvailability(@PathVariable Long id) {
         availabilityService.deleteSlot(id);

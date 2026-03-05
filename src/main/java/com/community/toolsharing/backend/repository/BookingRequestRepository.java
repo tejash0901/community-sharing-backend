@@ -9,12 +9,21 @@ import java.util.List;
 import java.util.Optional;
 
 public interface BookingRequestRepository extends JpaRepository<BookingRequest, Long> {
+    Optional<BookingRequest> findFirstBySlotIdAndBorrowerIdAndStatusInAndRequestedStartTimeAndRequestedEndTime(
+            Long slotId,
+            Long borrowerId,
+            List<BookingStatus> statuses,
+            Instant requestedStartTime,
+            Instant requestedEndTime
+    );
+
     boolean existsBySlotIdAndStatusInAndRequestedStartTimeLessThanAndRequestedEndTimeGreaterThan(
             Long slotId,
             List<BookingStatus> statuses,
             Instant requestedEndTime,
             Instant requestedStartTime
     );
+    List<BookingRequest> findAllBySlotIdAndStatusInOrderByRequestedStartTimeAsc(Long slotId, List<BookingStatus> statuses);
     List<BookingRequest> findAllByBorrowerId(Long borrowerId);
     List<BookingRequest> findAllByToolOwnerId(Long ownerId);
     Optional<BookingRequest> findByIdAndToolOwnerId(Long id, Long ownerId);

@@ -68,14 +68,33 @@ public class BookingService {
             throw new BadRequestException("Requested time must be inside the owner's availability slot");
         }
 
+        List<BookingStatus> activeStatuses = List.of(
+                BookingStatus.PENDING,
+                BookingStatus.APPROVED,
+                BookingStatus.RETURN_PENDING,
+                BookingStatus.RETURN_REJECTED
+        );
+
+        // Idempotent behavior: repeated clicks for the same slot/time by same borrower return existing request.
+        var existingMine = bookingRequestRepository.findFirstBySlotIdAndBorrowerIdAndStatusInAndRequestedStartTimeAndRequestedEndTime(
+                slot.getId(),
+                borrower.getId(),
+                activeStatuses,
+                requestedStartTime,
+                requestedEndTime
+        );
+        if (existingMine.isPresent()) {
+            return toResponse(existingMine.get());
+        }
+
         boolean overlaps = bookingRequestRepository.existsBySlotIdAndStatusInAndRequestedStartTimeLessThanAndRequestedEndTimeGreaterThan(
                 slot.getId(),
-                List.of(BookingStatus.PENDING, BookingStatus.APPROVED, BookingStatus.RETURN_PENDING, BookingStatus.RETURN_REJECTED),
+                activeStatuses,
                 requestedEndTime,
                 requestedStartTime
         );
         if (overlaps) {
-            throw new BadRequestException("Requested time overlaps with an existing booking request");
+            throw new BadRequestException("Requested time overlaps with another active booking request. Please choose a different time.");
         }
 
         BookingRequest booking = new BookingRequest();
