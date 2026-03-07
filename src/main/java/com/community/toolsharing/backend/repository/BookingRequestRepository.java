@@ -28,4 +28,8 @@ public interface BookingRequestRepository extends JpaRepository<BookingRequest, 
     List<BookingRequest> findAllByToolOwnerId(Long ownerId);
     Optional<BookingRequest> findByIdAndToolOwnerId(Long id, Long ownerId);
     Optional<BookingRequest> findByIdAndBorrowerId(Long id, Long borrowerId);
+    boolean existsBySlotIdAndStatusIn(Long slotId, List<BookingStatus> statuses);
+    boolean existsByToolIdAndStatusIn(Long toolId, List<BookingStatus> statuses);
+    long deleteBySlotId(Long slotId);
+    long deleteByToolId(Long toolId);
 }

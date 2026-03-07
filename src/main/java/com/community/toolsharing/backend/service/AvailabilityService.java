@@ -80,14 +80,16 @@ public class AvailabilityService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<AvailabilityResponse> getAvailableWindowsForTool(Long toolId) {
         AppUser user = currentUserUtil.getCurrentUser();
         toolRepository.findByIdAndCommunityId(toolId, user.getCommunity().getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Tool not found"));
 
         List<BookingStatus> activeStatuses = List.of(
-                BookingStatus.PENDING,
                 BookingStatus.APPROVED,
+                BookingStatus.COLLECT_PENDING,
+                BookingStatus.COLLECTED,
                 BookingStatus.RETURN_PENDING,
                 BookingStatus.RETURN_REJECTED
         );
@@ -139,6 +141,16 @@ public class AvailabilityService {
             throw new UnauthorizedException("Only owner can delete this slot");
         }
 
+        List<BookingStatus> activeStatuses = List.of(
+                BookingStatus.PENDING, BookingStatus.APPROVED,
+                BookingStatus.COLLECT_PENDING, BookingStatus.COLLECTED,
+                BookingStatus.RETURN_PENDING, BookingStatus.RETURN_REJECTED
+        );
+        if (bookingRequestRepository.existsBySlotIdAndStatusIn(slot.getId(), activeStatuses)) {
+            throw new BadRequestException("Cannot delete slot with active bookings");
+        }
+
+        bookingRequestRepository.deleteBySlotId(slot.getId());
         availabilitySlotRepository.delete(slot);
     }
 

@@ -39,6 +39,8 @@ public class AuthService {
 
     @Transactional
     public AuthResponse register(RegisterRequest request) {
+        request.setEmail(request.getEmail().trim().toLowerCase());
+
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new BadRequestException("Email already exists");
         }
@@ -66,11 +68,13 @@ public class AuthService {
     }
 
     public AuthResponse login(LoginRequest request) {
+        String email = request.getEmail().trim().toLowerCase();
+
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
+                new UsernamePasswordAuthenticationToken(email, request.getPassword())
         );
 
-        AppUser user = userRepository.findByEmail(request.getEmail())
+        AppUser user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         String token = jwtService.generateToken(new AppUserDetails(user));
