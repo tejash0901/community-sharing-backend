@@ -13,11 +13,15 @@ public class RegisterRequest {
     @NotBlank
     @Size(min = 6, message = "must be at least 6 characters")
     private String password;
+    @NotBlank(message = "Phone number is required")
     private String phoneNumber;
     @NotBlank
     private String communityInviteCode;
+    @NotBlank(message = "Block is required")
     private String block;
+    @NotBlank(message = "Floor is required")
     private String floor;
+    @NotBlank(message = "Flat number is required")
     private String flatNumber;
 
     public String getName() { return name; }
