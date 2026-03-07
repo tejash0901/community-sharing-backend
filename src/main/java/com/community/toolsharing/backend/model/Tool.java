@@ -39,6 +39,9 @@ public class Tool {
     @JoinColumn(name = "community_id", nullable = false)
     private Community community;
 
+    @Column(name = "image_file_name", length = 255)
+    private String imageFileName;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -63,6 +66,8 @@ public class Tool {
     public void setOwner(AppUser owner) { this.owner = owner; }
     public Community getCommunity() { return community; }
     public void setCommunity(Community community) { this.community = community; }
+    public String getImageFileName() { return imageFileName; }
+    public void setImageFileName(String imageFileName) { this.imageFileName = imageFileName; }
     public Instant getCreatedAt() { return createdAt; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
 }

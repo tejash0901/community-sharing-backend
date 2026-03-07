@@ -2,6 +2,7 @@ package com.community.toolsharing.backend.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 public class RegisterRequest {
     @NotBlank
@@ -10,6 +11,7 @@ public class RegisterRequest {
     @NotBlank
     private String email;
     @NotBlank
+    @Size(min = 6, message = "must be at least 6 characters")
     private String password;
     private String phoneNumber;
     @NotBlank

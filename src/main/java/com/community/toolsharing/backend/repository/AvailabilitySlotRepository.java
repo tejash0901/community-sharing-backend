@@ -14,4 +14,6 @@ public interface AvailabilitySlotRepository extends JpaRepository<AvailabilitySl
             Instant endTime,
             Instant startTime
     );
+
+    long deleteByToolId(Long toolId);
 }

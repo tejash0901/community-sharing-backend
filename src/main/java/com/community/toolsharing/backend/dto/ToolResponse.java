@@ -19,6 +19,7 @@ public record ToolResponse(
         String ownerFlatNumber,
         Long communityId,
         Instant createdAt,
-        String aiPriceHint
+        String aiPriceHint,
+        String imageUrl
 ) {
 }

@@ -48,6 +48,21 @@ public class BookingController {
         return ResponseEntity.ok(bookingService.rejectReturn(id));
     }
 
+    @PatchMapping("/{id}/collect")
+    public ResponseEntity<BookingResponse> collect(@PathVariable Long id) {
+        return ResponseEntity.ok(bookingService.collectBooking(id));
+    }
+
+    @PatchMapping("/{id}/collect/confirm")
+    public ResponseEntity<BookingResponse> confirmCollect(@PathVariable Long id) {
+        return ResponseEntity.ok(bookingService.confirmCollect(id));
+    }
+
+    @PatchMapping("/{id}/cancel")
+    public ResponseEntity<BookingResponse> cancel(@PathVariable Long id) {
+        return ResponseEntity.ok(bookingService.cancelBooking(id));
+    }
+
     @GetMapping("/mine")
     public ResponseEntity<List<BookingResponse>> mine() {
         return ResponseEntity.ok(bookingService.getMyBorrowedBookings());

@@ -4,8 +4,10 @@ import com.community.toolsharing.backend.dto.ToolRequest;
 import com.community.toolsharing.backend.dto.ToolResponse;
 import com.community.toolsharing.backend.service.ToolService;
 import jakarta.validation.Valid;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -18,9 +20,10 @@ public class ToolController {
         this.toolService = toolService;
     }
 
-    @PostMapping
-    public ResponseEntity<ToolResponse> createTool(@Valid @RequestBody ToolRequest request) {
-        return ResponseEntity.ok(toolService.createTool(request));
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ToolResponse> createTool(@Valid @RequestPart("tool") ToolRequest request,
+                                                   @RequestPart(value = "image", required = false) MultipartFile image) {
+        return ResponseEntity.ok(toolService.createTool(request, image));
     }
 
     @GetMapping
@@ -42,5 +45,14 @@ public class ToolController {
     public ResponseEntity<Void> deleteTool(@PathVariable Long id) {
         toolService.deleteTool(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/images/{fileName}")
+    public ResponseEntity<byte[]> getImage(@PathVariable String fileName) {
+        byte[] imageBytes = toolService.getImage(fileName);
+        String contentType = toolService.getImageContentType(fileName);
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .body(imageBytes);
     }
 }
