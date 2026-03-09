@@ -24,8 +24,8 @@ public interface BookingRequestRepository extends JpaRepository<BookingRequest, 
             Instant requestedStartTime
     );
     List<BookingRequest> findAllBySlotIdAndStatusInOrderByRequestedStartTimeAsc(Long slotId, List<BookingStatus> statuses);
-    List<BookingRequest> findAllByBorrowerId(Long borrowerId);
-    List<BookingRequest> findAllByToolOwnerId(Long ownerId);
+    List<BookingRequest> findAllByBorrowerIdOrderByCreatedAtDesc(Long borrowerId);
+    List<BookingRequest> findAllByToolOwnerIdOrderByCreatedAtDesc(Long ownerId);
     Optional<BookingRequest> findByIdAndToolOwnerId(Long id, Long ownerId);
     Optional<BookingRequest> findByIdAndBorrowerId(Long id, Long borrowerId);
     boolean existsBySlotIdAndStatusIn(Long slotId, List<BookingStatus> statuses);

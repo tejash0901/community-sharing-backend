@@ -252,7 +252,7 @@ public class BookingService {
     @Transactional(readOnly = true)
     public List<BookingResponse> getMyBorrowedBookings() {
         AppUser current = currentUserUtil.getCurrentUser();
-        return bookingRequestRepository.findAllByBorrowerId(current.getId()).stream()
+        return bookingRequestRepository.findAllByBorrowerIdOrderByCreatedAtDesc(current.getId()).stream()
                 .map(this::toResponse)
                 .toList();
     }
@@ -260,7 +260,7 @@ public class BookingService {
     @Transactional(readOnly = true)
     public List<BookingResponse> getOwnerBookings() {
         AppUser current = currentUserUtil.getCurrentUser();
-        return bookingRequestRepository.findAllByToolOwnerId(current.getId()).stream()
+        return bookingRequestRepository.findAllByToolOwnerIdOrderByCreatedAtDesc(current.getId()).stream()
                 .map(this::toResponse)
                 .toList();
     }
